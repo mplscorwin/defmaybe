@@ -1,25 +1,45 @@
 defmaybe - maybe declare well documented variables
 
-This is a small utility that provides the ability to declare variables
-in such a way that setq, defvar or defcustom may be used depending on
-the buffer-local setting of the variable defmaybe-defvar.  The future this
-may be enhanced to also provide support for feature flags, e.g. the
-ability to supplement the run-time from list of functions when an
-emacs feature is unavailable or disabled.
+Provides a drop in replacement to defvar (or defcustom) called
+**defvar-maybe**.  By setting the buffer local variable
+'defmabe-defvar' we can case eval-buffer, eval-region, etc. to
+implicitly reset all formally declared variables to their default
+bindings.
+
+I use this package to define variables (whether customizable or not)
+including their full documentation strings and customization options
+inline while I write packages.  As the package grows stable I've
+probably got it's local maybedef-defvar variable set to 'custom or t,
+meaning I want current to leave vars as currently set (or customized)
+as I re-eval the package or its parts.
+
+To quickly reset vars within an open buffer:
+#+begin_src elisp
+(with-current-buffer "hacked-on-supporting-feature.el" 
+  (let ((defmaybe-defvar nil))
+    (eval-buffer)))
+#+end_src
+
+It may be straight forward to create a similar wrapper for function
+defining forms such as defun.  This could support a "feature flags"
+like capability by introspecting for the availability of other
+features and creating alias instead when the given feature is present,
+meets requirements, etc..  It's unlikely I'll add this unless I end up
+needing it for something at which point I'll go hunting for someone
+else's solution first.  If you'd really like to see that feature here,
+or if your interested in writing it, please open an issue and/or
+otherwise reach out.
 
 * Usage
 
-This package provides a drop-in replacement for `defvar' that
-substities 'setq' during "DEVEL".  Place the following lines into a
-package you are hacking on:
+This package provides a drop-in replacement for defvar or defcustom
+that substitutes 'setq' during "DEVEL".  Place the following lines into
+a package you are hacking on:
 
 #+begin_src elisp
      (require 'defmaybe)
      (setq defmaybe-defvar nil) ;; nil=setq, t=defvar, 'custom=defcustom
      (defvar-maybe 'my-var "val" "is documented" :group 'mine :type 'string)
-
-     ;; later, at release-time, M-X eval-expression RET
-     (defmaybe-chdef 'defvar-maybe 'defcustom)
 #+end_src
 
 The default for the buffer-local var defmaybe-defvar is t, meaning that
@@ -27,8 +47,13 @@ customize options may appear in the source but defcustom won't
 actually be called when evaluating the defvar-maybe statement or the
 buffer, nor when compiling.
 
-To clean things up when you do not plan to require/provide
-defvar-maybe in your work use:
+A clean-up function is also provided:
+#+begin_src elisp
+     ;; later, at release-time, M-X eval-expression RET
+     (defmaybe-chdef 'defvar-maybe 'defcustom)
+#+end_src
+
+More generalized:
 #+begin_src elisp
   defmaybe-chdef(OLD-SYM NEW-SYM & optional MAX-ARGS)
 #+end_src
@@ -37,21 +62,16 @@ The final argument, MAX-ARGS causes truncation of any additional
 arguments **and their removal from your source**. So please be careful
 and stuff.
 
-The general form for release probably looks something like:
-#+begin_src elisp
-  (defmaybe-chdef 'defvar-maybe 'defcustom)
-#+end_src
-
-While cutting a DEVEL version may use:
+Cutting a DEVEL version could be:
 #+begin_src elisp
   ;; remove docstring and customize args
   (defmaybe-chdef 'defvar-maybe 'setq 1)
 #+end_src
 
-It should also be possable to use defmaybe-chdef in conjunction to
+It should also be possable to use defmaybe-chdef in conjunction with
 batch mode to support a packaging process that produces a version of
-your work without dependency on the module.  Removing (require
-'defmaybe) pragmatically is left as an exercise to the reader.
+your work without dependency on the module.  I've left removing the
+require pragmatically as an exercise for the reader.
 
 * Concept notes
 
