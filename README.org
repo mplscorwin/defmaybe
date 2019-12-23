@@ -1,0 +1,103 @@
+defmaybe - maybe declare well documented variables
+
+This is a small utility that provides the ability to declare variables
+in such a way that setq, defvar or defcustom may be used depending on
+the buffer-local setting of the variable defmaybe-defvar.  The future this
+may be enhanced to also provide support for feature flags, e.g. the
+ability to supplement the run-time from list of functions when an
+emacs feature is unavailable or disabled.
+
+* Usage
+
+This package provides a drop-in replacement for `defvar' that
+substities 'setq' during "DEVEL".  Place the following lines into a
+package you are hacking on:
+
+#+begin_src elisp
+     (require 'defmaybe)
+     (setq defmaybe-defvar nil) ;; nil=setq, t=defvar, 'custom=defcustom
+     (defvar-maybe 'my-var "val" "is documented" :group 'mine :type 'string)
+
+     ;; later, at release-time, M-X eval-expression RET
+     (defmaybe-chdef 'defvar-maybe 'defcustom)
+#+end_src
+
+The default for the buffer-local var defmaybe-defvar is t, meaning that
+customize options may appear in the source but defcustom won't
+actually be called when evaluating the defvar-maybe statement or the
+buffer, nor when compiling.
+
+To clean things up when you do not plan to require/provide
+defvar-maybe in your work use:
+#+begin_src elisp
+  defmaybe-chdef(OLD-SYM NEW-SYM & optional MAX-ARGS)
+#+end_src
+
+The final argument, MAX-ARGS causes truncation of any additional
+arguments **and their removal from your source**. So please be careful
+and stuff.
+
+The general form for release probably looks something like:
+#+begin_src elisp
+  (defmaybe-chdef 'defvar-maybe 'defcustom)
+#+end_src
+
+While cutting a DEVEL version may use:
+#+begin_src elisp
+  ;; remove docstring and customize args
+  (defmaybe-chdef 'defvar-maybe 'setq 1)
+#+end_src
+
+It should also be possable to use defmaybe-chdef in conjunction to
+batch mode to support a packaging process that produces a version of
+your work without dependency on the module.  Removing (require
+'defmaybe) pragmatically is left as an exercise to the reader.
+
+* Concept notes
+
+The following are my notes prior to initiating the project.  
+
+** Feature flags
+
+Map features to replacement functionality and information.
+
+** Swap variable definition forms
+
+E.g. use defvar, defcustom or plain 'ol setq.
+
+** Document everything
+
+ Rendered source need contain neither non-contributing documentation
+ nor any dependency on defmaybe.
+
+
+
+* BUGS
+
+** Byte-compiler warning
+
+I get byte-compilation warning about defmyabe-defvar not being defined
+as a function, which it isn't and shouldn't be. Thanks in advance for
+suggestions or patch.
+
+* TODO
+
+These are items under consideration.  Maybe I have notes or borked
+code somwhere about some of this. *More* than welcome to show me how
+it's done :]
+
+** TODO Feature flags as described elsewhere
+** TODO Extract an 'at-point' version of chdef
+** TODO chdef-remap(&rest (maybe-deffed-var . chdef-args))
+
+* Acknoledgements, Author Contact and Support
+
+Thanks in advance for any issues you report; please use the issue tracker to
+request commit access and make suggestions as well as to report bugs.
+
+Ever bit as much thanks to everyone on #Emacs@Freenode and the
+contributers to [[https://emacswiki.org][EmacsWiki]] for rather a great deal of kind assistance.
+
+Contact the author by email (Corwin AT Bru DOT st) or find "Corwin" on
+Discord, here: https://discord.gg/gar8ns, or as "q[corwin]" on
+irc.freenode.net.
