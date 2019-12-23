@@ -20,36 +20,10 @@
 ;;; TODO: Extract an 'at-point' version of chdef
 
 ;;; Dependancies:
+
 (require 'seq)
 
 ;;; Code:
-
-;;;;
-;;;; Whoops!  Wrong answer.
-;;;; Collecting each as an expression (template?) and then hacking
-;;;; in a replacement for car has to be easier that parsing elisp
-;;;; with regexes to sus out any arguments we need to drop..
-;;;;
-;; (defun defvar-maybe-remove (&optional maybe)
-;;   "Remove defvar-maybe from `current-buffer', such as for release.
-
-;; MAYBE as described for func: `defmaybe', which see for detail.
-;; Defaults to the value of var: `defmaybe' when called interactively."
-;;   (interactive
-;;    (concat "Snil=setq, t=defvar, 'custom=defcustom (" defmaybe "):"))
-;;   (save-excursion
-;;     (save-match-data
-;;       (let ((new-func (if maybe (if (eq 'custom maybe)
-;; 				    "defcustom"
-;; 				  "defvar")
-;; 			"setq"))
-;; 	    (last-pos (goto-char (point-min))))
-;; 	(while (< (last-pos)
-;; 		  (setq last-pos
-;; 			(re-search-forward "^\\s*(\\(defmaybe\\)\\s+" nil t)))
-;; 	  (replace-match new-func t t nil 1)
-;; 	  (ignore
-;; 	   "^--- put replacement stuff here..."))))))
 
 (defvar-local defmaybe-defvar nil
   "Local. Controls func: `defvar-maybe', which see for detail.")
