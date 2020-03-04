@@ -1,5 +1,14 @@
 defmaybe - maybe declare well documented variables
 
+#+begin_quote
+
+I've largely abandoned this.  I'll likely drop the reop pretty soon.
+Open an issue or otherwise reach out if you want to talk about the
+thing I've been putting off instead of putting off improving this 
+approach :)
+
+#+end_quote
+
 Provides a drop in replacement to defvar (or defcustom) called
 **defvar-maybe**.  By setting the buffer local variable
 'defmabe-defvar' we can case eval-buffer, eval-region, etc. to
